@@ -1,0 +1,44 @@
+﻿@using HabitTracker.Components.Models;
+@using HabitTracker.Components.Services;
+@using System.ComponentModel.DataAnnotations;
+
+@page "/create"
+@inject HabitService habitService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Create a new habit</PageTitle>
+
+<div style="margin-bottom: 20px;">
+	<h1>Create Habit</h1>
+	<a href="/">Back To Homepage</a>
+</div>
+
+<div>
+	<h3 style="margin: 20px 0;">Enter the details for a new habit below.</h3>
+
+	<EditForm Model="newHabit" OnValidSubmit="HandleValidSubmit">
+		<DataAnnotationsValidator />
+
+		<div>
+			<label>Habit Name: </label>
+			<InputText @bind-Value="newHabit.Name" placeholder="Enter a name for your habit" />
+			<ValidationMessage For="@(() => newHabit.Name)" />
+		</div>
+
+		<div style="margin-top: 20px;">
+			<button type="submit" class="btn btn-outline-primary p-2" margin-top="100px">Save Habit</button>
+		</div>
+	</EditForm>
+</div>
+
+@code {
+	private Habit newHabit = new();
+
+	private async void HandleValidSubmit()
+	{
+		await habitService.AddHabitAsync(newHabit);
+		newHabit = new Habit();
+		Navigation.NavigateTo("/", forceLoad: true);
+	}
+}

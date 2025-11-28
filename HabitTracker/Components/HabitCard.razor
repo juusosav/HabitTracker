@@ -1,0 +1,84 @@
+﻿@using HabitTracker.Components.Services
+
+@inject HabitService habitService
+
+<div class="habit-card">
+	<span class="habit-name">@Name</span>
+	<span class="habit-status">
+		<label class="custom-checkbox">
+			@if (!IsDone)
+			{
+				<input type="checkbox" checked="@IsDone" @onchange="HandleCheckboxChange">
+				<span class="checkmark"></span>
+			}
+		</label>
+	</span>
+
+	<div class="habit-actions">
+		@if (IsDone)
+		{
+			<span>Done!</span>
+			@if (showPopup)
+			{
+				<span class="popup-message">Habit done, great job!</span>
+			}
+		}
+		<button class="btn btn-sm btn-warning" @onclick="EditClicked">Edit</button>
+		<button class="btn btn-sm btn-danger" @onclick="DeleteClicked">Delete</button>
+	</div>
+</div>
+
+@code {
+
+	[Parameter]
+	public int Id { get; set; }
+	[Parameter]
+	public string Name { get; set; } = "";
+	[Parameter]
+	public bool IsDone { get; set; } = false;
+
+	public bool showPopup { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<int> OnEdit { get; set; }
+	[Parameter]
+	public EventCallback<int> OnDelete { get; set; }
+	[Parameter]
+	public EventCallback<(int, bool)> OnIsDoneChanged { get; set; }
+
+
+
+	private Task EditClicked() => OnEdit.InvokeAsync(Id);
+	private Task DeleteClicked() => OnDelete.InvokeAsync(Id);
+
+	private async Task HandleCheckboxChange(ChangeEventArgs e)
+	{
+		IsDone = e.Value is bool value && value;
+
+		Console.WriteLine($"Checkbox changed to: {IsDone}");
+
+		if (IsDone)
+		{
+			await Task.Delay(500);
+			showPopup = true;
+			StateHasChanged();
+
+			await Task.Delay(2000);
+			showPopup = false;
+			StateHasChanged();
+		}
+
+		if (OnIsDoneChanged.HasDelegate)
+		{
+			await OnIsDoneChanged.InvokeAsync((Id, IsDone));
+
+			await habitService.HandleIsDoneChanged(Id, IsDone);
+		}
+	}
+
+	private void ClosePopUp()
+	{
+		showPopup = false;
+		StateHasChanged();
+	}
+}

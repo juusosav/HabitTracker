@@ -1,0 +1,92 @@
+﻿@using HabitTracker.Components.Services;
+@using HabitTracker.Components.Models;
+
+@inject HabitService habitService
+@inject NavigationManager Navigation
+@page "/statistics"
+@rendermode InteractiveServer
+
+<PageTitle>Statistics</PageTitle>
+
+<h1>Habit Statistics</h1>
+
+<div>
+	<label for="timeframe">Select timeframe:</label>
+	<select id="timeframe" @bind="selectedTimeframe">
+		<option value="weekly">Weekly</option>
+		<option value="monthly">Monthly</option>
+	</select>
+</div>
+
+<div>
+	<h3>Habit Statistics: @selectedTimeframe</h3>
+
+	@if (habitStatistics != null && habitStatistics.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Habit</th>
+					<th>Days Completed</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var stat in habitStatistics)
+				{
+					<tr>
+						<td>@stat.Name</td>
+						<td>@stat.CompletedCount</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	else
+	{
+		<p>No data available for selected timeframe.</p>
+	}
+
+</div>
+
+@code {
+	private string selectedTimeframe = "weekly";
+
+	private List<HabitStat>? habitStatistics;
+
+	// Initialize the list to load the statistics of habits
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadStatistics(selectedTimeframe);
+	}
+
+	// Actually get the statistics via HabitService and add them to a new list
+	private async Task LoadStatistics(string timeframe)
+	{
+		var habits = await habitService.GetAllHabitsAsync();
+
+		habitStatistics = new List<HabitStat>();
+
+		foreach (var habit in habits)
+		{
+			int completedCount = await CalculateCompletionCount(habit.Id, timeframe);
+			habitStatistics.Add(new HabitStat
+				{
+					Name = habit.Name,
+					CompletedCount = completedCount
+				});
+		}
+	}
+
+	// 
+	private async Task<int> CalculateCompletionCount(int habitId, string timeframe)
+	{
+		var completedHabits = await habitService.GetCompletedHabitsForTimeframe(habitId, timeframe);
+		return completedHabits.Count();
+	}
+
+	private async Task OnTimeframeChanged(ChangeEventArgs e)
+	{
+		selectedTimeframe = e.Value?.ToString() ?? "weekly";
+		await LoadStatistics(selectedTimeframe);
+	}
+}

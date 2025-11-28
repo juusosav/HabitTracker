@@ -1,0 +1,56 @@
+﻿@page "/edit/{id:int}"
+@rendermode InteractiveServer
+@using HabitTracker.Components.Models
+@using HabitTracker.Components.Services
+
+@inject HabitService habitService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Habit</PageTitle>
+
+<h1>Edit Habit</h1>
+
+<h3>Edit the current habit</h3>
+
+@if (habit == null)
+{
+	<p>Sorry, the habit you are trying to edit does not exist. Redirecting to the homepage...</p>
+}
+else
+{
+	<EditForm Model="habit" OnValidSubmit="HandleSubmit">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<div>
+			<InputText @bind-Value="habit.Name" />
+		</div>
+		<button type="submit" class="btn btn-sm btn-outline-primary">Save Changes</button>
+	</EditForm>
+}
+
+@code {
+	[Parameter] public int Id { get; set; }
+	private Habit habit;
+
+	protected override async Task OnInitializedAsync()
+	{
+		habit = await habitService.GetHabitByIdAsync(Id);
+
+		if (habit == null)
+		{
+			await Task.Delay(2000);
+			Navigation.NavigateTo("/", forceLoad: true);
+		}
+	}
+
+	private async Task HandleSubmit()
+	{
+		Console.WriteLine("Form submitted!");
+		if (habit != null)
+		{
+			await habitService.EditHabitAsync(habit, habit.Id);
+			Navigation.NavigateTo("/", forceLoad: true);
+		}
+	}
+}

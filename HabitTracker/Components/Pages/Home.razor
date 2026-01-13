@@ -9,121 +9,124 @@
 <PageTitle>Habit Tracker</PageTitle>
 
 <div>
-	<h1>Welcome to your habit tracker</h1>
+    <h1>Welcome to your personal habit tracker</h1>
 </div>
 
 <div>
-	<h2>Daily Habits</h2>
+    <h2>Daily Habits</h2>
 </div>
 <div>
-	@foreach (var h in habits)
-	{
-		@if (@h.IsDone == false)
-		{
-			<HabitCard Id="@h.Id"
-					   Name="@h.Name"
-					   IsDone="@h.IsDone"
-					   OnEdit="EditHabit"
-					   OnDelete="DeleteHabit"
-					   OnIsDoneChanged="HandleIsDoneChanged"
-					   @key="@h.Id" />
-		}
-	}
+    @foreach (var h in habits)
+    {
+        @if (@h.IsDone == false)
+        {
+            <HabitCard Id="@h.Id"
+                       Name="@h.Name"
+                       IsDone="@h.IsDone"
+                       OnEdit="EditHabit"
+                       OnDelete="DeleteHabit"
+                       OnIsDoneChanged="HandleIsDoneChanged"
+                       @key="@h.Id" />
+        }
+    }
 </div>
 <div class="habit-addbutton">
-	<button type="button" class="btn btn-outline-primary p-2" @onclick="NavigateToCreateComponent">Add Habit</button>
+    <button type="button" class="btn btn-outline-primary p-2" @onclick="NavigateToCreateComponent">Add Habit</button>
 </div>
 
 <div>
-	<h2>Habits Completed Today</h2>
+    @if (habits.Any(h => h.IsDone))
+    {
+        <h2>Habits Completed Today</h2>
+    }
 </div>
+
 <div>
-	@foreach (var h in habits)
-	{
-		@if (@h.IsDone == true)
-		{
-			<HabitCard Id="@h.Id"
-					   Name="@h.Name"
-					   IsDone="@h.IsDone"
-					   OnEdit="EditHabit"
-					   OnDelete="DeleteHabit"
-					   @key="@h.Id" />
-		}
-	}
+
+    @foreach (var h in habits)
+    {
+        @if (@h.IsDone == true)
+        {
+            <HabitCard Id="@h.Id"
+                       Name="@h.Name"
+                       IsDone="@h.IsDone"
+                       OnEdit="EditHabit"
+                       OnDelete="DeleteHabit"
+                       @key="@h.Id" />
+        }
+
+    }
 </div>
 
 @code {
-	private List<Habit> habits = new List<Habit>();
+    private List<Habit> habits = new List<Habit>();
 
-	private DateTime? lastResetDate = null;
+    private DateTime? lastResetDate = null;
 
-	protected override async Task OnInitializedAsync()
-	{
-		await FetchHabits();
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchHabits();
 
-		var lastReset = await habitService.GetLastResetDateAsync();
-		lastResetDate = lastReset?.Date;
+        var lastReset = await habitService.GetLastResetDateAsync();
+        lastResetDate = lastReset?.Date;
 
-		if (lastResetDate == null || lastResetDate.Value.Date != DateTime.UtcNow.Date)
-		{
-			await ResetHabitsForNewDay();
-		}
+        if (lastResetDate == null || lastResetDate.Value.Date != DateTime.UtcNow.Date)
+        {
+            await ResetHabitsForNewDay();
+        }
 
-	}
+    }
 
-	private async Task FetchHabits()
-	{
-		habits = await habitService.GetAllHabitsAsync();
-		Console.WriteLine($"Fetched habits: {habits.Count}");
-		StateHasChanged(); // Force UI to update after fetching the habits
-	}
+    private async Task FetchHabits()
+    {
+        habits = await habitService.GetAllHabitsAsync();
+        StateHasChanged();
+    }
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			await FetchHabits();
-		}
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FetchHabits();
+        }
+    }
 
-	private void NavigateToCreateComponent() => Navigation.NavigateTo("/create");
+    private void NavigateToCreateComponent() => Navigation.NavigateTo("/create");
 
-	private async Task DeleteHabit(int id)
-	{
-		await habitService.DeleteHabitAsync(id);
-		await FetchHabits();
-	}
+    private async Task DeleteHabit(int id)
+    {
+        await habitService.DeleteHabitAsync(id);
+        await FetchHabits();
+    }
 
-	private void EditHabit(int id) => Navigation.NavigateTo($"/edit/{id}");
+    private void EditHabit(int id) => Navigation.NavigateTo($"/edit/{id}");
 
 
-	// This method gets the habit to update via the HabitService from the database and edits the IsDone property
-	private async Task HandleIsDoneChanged((int id, bool newIsDone) habitData)
-	{
-		var habitToUpdate = habits.FirstOrDefault(h => h.Id == habitData.id);
+    private async Task HandleIsDoneChanged((int id, bool newIsDone) habitData)
+    {
+        var habitToUpdate = habits.FirstOrDefault(h => h.Id == habitData.id);
 
-		if (habitToUpdate != null)
-		{
-			habitToUpdate.IsDone = habitData.newIsDone;
-			await habitService.EditHabitAsync(habitToUpdate, habitToUpdate.Id);
-			Console.WriteLine($"Checkbox state in Home changed successfully: {habitData.newIsDone}");
-			await FetchHabits();
-		}
-	}
+        if (habitToUpdate != null)
+        {
+            habitToUpdate.IsDone = habitData.newIsDone;
+            await habitService.EditHabitAsync(habitToUpdate, habitToUpdate.Id);
+            await FetchHabits();
+        }
+    }
 
-	private async Task ResetHabitsForNewDay()
-	{
-		foreach (var habit in habits)
-		{
-			habit.IsDone = false;
-			await habitService.EditHabitAsync(habit, habit.Id);
-		}
+    private async Task ResetHabitsForNewDay()
+    {
+        foreach (var habit in habits)
+        {
+            habit.IsDone = false;
+            await habitService.EditHabitAsync(habit, habit.Id);
+        }
 
-		var lastReset = new LastResetDate { Date = DateTime.UtcNow };
-		await habitService.SaveLastResetDateAsync(lastReset);
+        var lastReset = new LastResetDate { Date = DateTime.UtcNow };
+        await habitService.SaveLastResetDateAsync(lastReset);
 
-		Console.WriteLine("Habits reset for a new day!");
-		StateHasChanged();
-	}
+        Console.WriteLine("Habits reset for a new day!");
+        StateHasChanged();
+    }
 
 }

@@ -10,7 +10,7 @@
 
 <h1>Habit Statistics</h1>
 
-<div>
+<div class="mt-2">
 	<label for="timeframe">Select timeframe:</label>
 	<select id="timeframe" @bind="selectedTimeframe">
 		<option value="weekly">Weekly</option>
@@ -18,7 +18,7 @@
 	</select>
 </div>
 
-<div>
+<div class="mt-5">
 	<h3>Habit Statistics: @selectedTimeframe</h3>
 
 	@if (habitStatistics != null && habitStatistics.Any())
@@ -53,13 +53,11 @@
 
 	private List<HabitStat>? habitStatistics;
 
-	// Initialize the list to load the statistics of habits
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadStatistics(selectedTimeframe);
 	}
 
-	// Actually get the statistics via HabitService and add them to a new list
 	private async Task LoadStatistics(string timeframe)
 	{
 		var habits = await habitService.GetAllHabitsAsync();
@@ -77,7 +75,6 @@
 		}
 	}
 
-	// 
 	private async Task<int> CalculateCompletionCount(int habitId, string timeframe)
 	{
 		var completedHabits = await habitService.GetCompletedHabitsForTimeframe(habitId, timeframe);

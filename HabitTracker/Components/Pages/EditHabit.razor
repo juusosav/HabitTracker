@@ -10,8 +10,6 @@
 
 <h1>Edit Habit</h1>
 
-<h3>Edit the current habit</h3>
-
 @if (habit == null)
 {
 	<p>Sorry, the habit you are trying to edit does not exist. Redirecting to the homepage...</p>
@@ -25,13 +23,13 @@ else
 		<div>
 			<InputText @bind-Value="habit.Name" />
 		</div>
-		<button type="submit" class="btn btn-sm btn-outline-primary">Save Changes</button>
+		<button type="submit" class="btn btn-sm btn-outline-primary mt-4">Save Changes</button>
 	</EditForm>
 }
 
 @code {
 	[Parameter] public int Id { get; set; }
-	private Habit habit;
+	private Habit? habit;
 
 	protected override async Task OnInitializedAsync()
 	{

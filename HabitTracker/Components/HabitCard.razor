@@ -55,8 +55,6 @@
 	{
 		IsDone = e.Value is bool value && value;
 
-		Console.WriteLine($"Checkbox changed to: {IsDone}");
-
 		if (IsDone)
 		{
 			await Task.Delay(500);

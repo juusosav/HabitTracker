@@ -29,16 +29,33 @@
 		<div style="margin-top: 20px;">
 			<button type="submit" class="btn btn-outline-primary p-2" margin-top="100px">Save Habit</button>
 		</div>
-	</EditForm>
+
+		@if (showPopUp)
+		{
+			<span class="popup-message">Habit created</span>
+		}
+
+		</EditForm>
 </div>
 
 @code {
 	private Habit newHabit = new();
 
+	private bool showPopUp { get; set; } = false;
+
 	private async void HandleValidSubmit()
 	{
+		showPopUp = true;
+		await Task.Delay(1500);
+		StateHasChanged();
+
 		await habitService.AddHabitAsync(newHabit);
 		newHabit = new Habit();
+
+		await Task.Delay(500);
+		showPopUp = false;
+		StateHasChanged();
+
 		Navigation.NavigateTo("/", forceLoad: true);
 	}
 }

@@ -72,9 +72,13 @@ namespace HabitTracker.Components.Services
                 startDate = now.AddDays(-7);
             }
 
-            else
+            else if (timeframe == "monthly")
             {
                 startDate = new DateTime(now.Year, now.Month, 1);
+            }
+            else
+            {
+                startDate = new DateTime(2025, 11, 22);
             }
 
             return await _context.HabitCompletions
@@ -82,7 +86,7 @@ namespace HabitTracker.Components.Services
             .ToListAsync();
         }
 
-        // Changes the IsDone property from false -> true, and saves a new completion for the HabitCompletions database
+        
         public async Task HandleIsDoneChanged(int habitId, bool isDone)
         {
             var habit = await _context.Habits.FirstOrDefaultAsync(h => h.Id == habitId);
@@ -98,7 +102,6 @@ namespace HabitTracker.Components.Services
 
                     if (!alreadyCompletedToday)
                     {
-                        // Create and save new completion if not already done today
                         var completion = new HabitCompletion
                         {
                             HabitId = habitId,
@@ -111,7 +114,7 @@ namespace HabitTracker.Components.Services
             }
             await _context.SaveChangesAsync();
         }
-        // Gets the last reset time for the habits, if one exists
+        
         public async Task<LastResetDate?> GetLastResetDateAsync()
         {
             return await _context.LastResetDate.OrderByDescending(l => l.Date).FirstOrDefaultAsync();

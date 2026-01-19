@@ -24,11 +24,20 @@ else
 			<InputText @bind-Value="habit.Name" />
 		</div>
 		<button type="submit" class="btn btn-sm btn-outline-primary mt-4">Save Changes</button>
-	</EditForm>
+
+		@if (showPopUp)
+		{
+			<span class="popup-message">Changes saved</span>
+		}
+		</EditForm>
 }
 
 @code {
+
 	[Parameter] public int Id { get; set; }
+
+	private bool showPopUp { get; set; } = false;
+
 	private Habit? habit;
 
 	protected override async Task OnInitializedAsync()
@@ -44,10 +53,19 @@ else
 
 	private async Task HandleSubmit()
 	{
-		Console.WriteLine("Form submitted!");
+
 		if (habit != null)
 		{
+			showPopUp = true;
+			await Task.Delay(1000);
+			StateHasChanged();
+
 			await habitService.EditHabitAsync(habit, habit.Id);
+
+			await Task.Delay(500);
+			showPopUp = false;
+			StateHasChanged();
+
 			Navigation.NavigateTo("/", forceLoad: true);
 		}
 	}

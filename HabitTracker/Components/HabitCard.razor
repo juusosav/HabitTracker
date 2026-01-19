@@ -17,14 +17,16 @@
 	<div class="habit-actions">
 		@if (IsDone)
 		{
-			<span class="bi bi-check-circle-fill px-2" style="font-size: 1.4rem;"></span>
-			@if (showPopup)
-			{
-				<span class="popup-message">Habit done, great job!</span>
-			}
+			<span class="bi bi-check-circle-fill px-2 habit-actions" style="font-size: 1.4rem;"></span>
 		}
 		<button class="btn btn-sm btn-warning" @onclick="EditClicked">Edit</button>
 		<button class="btn btn-sm btn-danger" @onclick="DeleteClicked">Delete</button>
+	</div>
+	<div>
+		@if (showPopup)
+		{
+			<span class="popup-message">Habit done, great job!</span>
+		}
 	</div>
 </div>
 

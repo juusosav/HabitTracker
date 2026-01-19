@@ -23,7 +23,7 @@ else
 		<div>
 			<InputText @bind-Value="habit.Name" />
 		</div>
-		<button type="submit" class="btn btn-sm btn-outline-primary mt-4">Save Changes</button>
+		<button type="submit" disabled="@isProcessing" class="btn btn-sm btn-outline-primary mt-4">Save Changes</button>
 
 		@if (showPopUp)
 		{
@@ -37,6 +37,8 @@ else
 	[Parameter] public int Id { get; set; }
 
 	private bool showPopUp { get; set; } = false;
+
+	private bool isProcessing { get; set; } = false;
 
 	private Habit? habit;
 
@@ -56,12 +58,14 @@ else
 
 		if (habit != null)
 		{
+			isProcessing = true;
 			showPopUp = true;
 			await Task.Delay(1000);
 			StateHasChanged();
 
 			await habitService.EditHabitAsync(habit, habit.Id);
 
+			isProcessing = false;
 			await Task.Delay(500);
 			showPopUp = false;
 			StateHasChanged();

@@ -4,7 +4,7 @@
 
 HabitTracker is a **Blazor Server** web application for tracking daily habits. Users can create, edit, complete, and delete habits. The app keeps track of completed habits, provides daily reset functionality, and includes statistics for habit completion over time.
 
-ATTENTION: The current version of the app is only a demo, user-specific authentication and databases will be implemented later. Reset of habits per day is also offline, but can be found in the code.
+ATTENTION: The current version of the app is only a demo, user-specific authentication and databases will be implemented later.
 ---
 
 ## Features
